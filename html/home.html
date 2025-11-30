@@ -1,247 +1,262 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
-
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>
-    
-    Welcome to Our Site - Pages | My Raytha Site
-    
-  </title>
-
-  <link rel="shortcut icon" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/box.svg" type="image/svg+xml" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome to Our Site | My Raytha Site</title>
+  
+  <!-- Bootstrap 5 CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  
+  <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-</head>
-
-<body class="d-flex flex-column min-vh-100 bg-body-tertiary">
-  <header class="sticky-top">
-    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
-      <div class="container">
-        <a class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2" href="./">
-          <i class="bi bi-box-fill"></i>
-          My Raytha Site
-        </a>
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          
-          <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-1">
-            
-              
-              <li class="nav-item">
-                <a class="nav-link px-3 rounded-pill " href="home.html">
-                  Home
-                </a>
-              </li>
-            
-              
-              <li class="nav-item">
-                <a class="nav-link px-3 rounded-pill " href="posts.html">
-                  Posts
-                </a>
-              </li>
-            
-              
-              <li class="nav-item">
-                <a class="nav-link px-3 rounded-pill active bg-primary bg-opacity-10 text-primary fw-semibold" href="pages.html">
-                  Pages
-                </a>
-              </li>
-            
-              
-              <li class="nav-item">
-                <a class="nav-link px-3 rounded-pill " href="pages_about.html">
-                  About
-                </a>
-              </li>
-            
-          </ul>
-          <div class="d-flex align-items-center ms-lg-3 gap-2">
-            
-            <a href="./account/login" class="btn btn-outline-primary">
-              <i class="bi bi-box-arrow-in-right me-1"></i>Login
-            </a>
-            <a href="./account/create" class="btn btn-primary">
-              <i class="bi bi-person-plus me-1"></i>Sign up
-            </a>
-            
-          </div>
-        </div>
-      </div>
-    </nav>
-  </header>
-
-  <main class="flex-grow-1">
-    <!-- Hero Section -->
-<div class="bg-primary bg-gradient text-white py-5">
-  <div class="container py-5">
-    <div class="row align-items-center g-5">
-      <div class="col-lg-6">
-        <h1 class="display-4 fw-bold mb-3">
-          <i class="bi bi-check-circle-fill me-2"></i>You did it!
-        </h1>
-        <p class="lead mb-4 opacity-75">
-          Welcome to the Raytha Content Management System! This is your starting point for building something amazing. Head to the Admin Panel to customize everything.
-        </p>
-        <div class="d-flex flex-wrap gap-3">
-          <a href="./raytha" class="btn btn-light btn-lg px-4 d-inline-flex align-items-center gap-2">
-            <i class="bi bi-gear-fill"></i>
-            Admin Panel
-          </a>
-          <a href="https://raytha.com/user-guide" class="btn btn-outline-light btn-lg px-4 d-inline-flex align-items-center gap-2">
-            <i class="bi bi-book"></i>
-            User Guide
-          </a>
-        </div>
-      </div>
-      <div class="col-lg-6">
-        <div class="card bg-white bg-opacity-10 border-0 shadow-lg">
-          <div class="card-body p-4">
-            <div class="ratio ratio-16x9">
-              <img src=https://placehold.co/400x300/e2e8f0/64748b?text=Image+Placeholder class="rounded-3 object-fit-cover" alt="Raytha CMS Screenshot">
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Features Section -->
-<div class="py-5">
-  <div class="container py-4">
-    <div class="text-center mb-5">
-      <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill mb-3">
-        <i class="bi bi-stars me-1"></i>Features
-      </span>
-      <h2 class="display-6 fw-bold text-dark">Everything you need</h2>
-      <p class="lead text-secondary col-lg-8 mx-auto">Raytha gives you complete control over your content and templates with powerful, developer-friendly features.</p>
-    </div>
+  
+  <!-- Custom Styles -->
+  <style>
+    :root {
+      --primary-color: #0d6efd;
+      --secondary-color: #6c757d;
+      --dark-color: #212529;
+      --light-color: #f8f9fa;
+    }
     
-    <div class="row g-4">
-      <div class="col-md-6 col-lg-3">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-body text-center p-4">
-            <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-3">
-              <i class="bi bi-collection fs-2"></i>
-            </div>
-            <h5 class="card-title fw-semibold">Custom Content Types</h5>
-            <p class="card-text text-secondary small">Define exactly how your content is structured with flexible custom fields.</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-3">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-body text-center p-4">
-            <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-3">
-              <i class="bi bi-code-slash fs-2"></i>
-            </div>
-            <h5 class="card-title fw-semibold">Liquid Templates</h5>
-            <p class="card-text text-secondary small">Build dynamic pages with the powerful Liquid templating engine.</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-3">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-body text-center p-4">
-            <div class="bg-info bg-opacity-10 text-info rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-3">
-              <i class="bi bi-shield-check fs-2"></i>
-            </div>
-            <h5 class="card-title fw-semibold">User Management</h5>
-            <p class="card-text text-secondary small">Built-in authentication and role-based access control.</p>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-6 col-lg-3">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-body text-center p-4">
-            <div class="bg-warning bg-opacity-10 text-warning rounded-circle d-inline-flex align-items-center justify-content-center p-3 mb-3">
-              <i class="bi bi-lightning-charge fs-2"></i>
-            </div>
-            <h5 class="card-title fw-semibold">Fast & Flexible</h5>
-            <p class="card-text text-secondary small">Built with .NET for performance and adaptability.</p>
-          </div>
-        </div>
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    main {
+      flex: 1;
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+    }
+    
+    .footer {
+      background-color: var(--dark-color);
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .footer a {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+    }
+    
+    .footer a:hover {
+      color: #fff;
+    }
+    
+    /* Article typography */
+    article {
+      font-size: 1.1rem;
+    }
+    
+    article h2, article h3, article h4 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+    }
+    
+    article p {
+      margin-bottom: 1em;
+    }
+    
+    article img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 0.5rem;
+    }
+    
+    article pre {
+      background-color: #f8f9fa;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+    }
+    
+    article code {
+      background-color: #f8f9fa;
+      padding: 0.2em 0.4em;
+      border-radius: 0.25rem;
+    }
+    
+    article pre code {
+      background-color: transparent;
+      padding: 0;
+    }
+  </style>
+</head>
+<body class="bg-light">
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="./">
+        <i class="bi bi-box-fill"></i>
+        My Raytha Site
+      </a>
+      
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarMain">
+        
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          
+          <li class="nav-item">
+            <a class="nav-link nav-link" 
+               href="home.html"
+               >
+              Home
+            </a>
+          </li>
+          
+          <li class="nav-item">
+            <a class="nav-link nav-link" 
+               href="posts.html"
+               >
+              Posts
+            </a>
+          </li>
+          
+          <li class="nav-item">
+            <a class="nav-link nav-link" 
+               href="pages.html"
+               >
+              Pages
+            </a>
+          </li>
+          
+          <li class="nav-item">
+            <a class="nav-link nav-link" 
+               href="pages_about.html"
+               >
+              About
+            </a>
+          </li>
+          
+        </ul>
       </div>
     </div>
-  </div>
-</div>
+  </nav>
 
-<!-- Content Section -->
-<div class="bg-white py-5">
-  <div class="container py-4">
-    <div class="row justify-content-center">
-      <div class="col-lg-8">
-        <div class="text-center mb-4">
-          <span class="badge bg-secondary bg-opacity-10 text-secondary px-3 py-2 rounded-pill mb-3">
-            <i class="bi bi-file-text me-1"></i>About This Page
-          </span>
-          <h2 class="display-6 fw-bold text-dark">Welcome to Our Site</h2>
-        </div>
-        <div class="card border-0 shadow-sm">
-          <div class="card-body p-4 p-lg-5">
-            <div class="lead text-secondary">
-              <p>This is the home page of your Raytha CMS website. You can customize this content in the admin panel.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+  <!-- Main Content -->
+  <main>
+    
 
-<!-- CTA Section -->
-<div class="bg-dark text-white py-5">
-  <div class="container py-4">
-    <div class="row justify-content-center text-center">
-      <div class="col-lg-8">
-        <h2 class="display-6 fw-bold mb-3">Ready to get started?</h2>
-        <p class="lead opacity-75 mb-4">Explore the Admin Panel to create content types, add content, and customize your templates.</p>
-        <div class="d-flex flex-wrap justify-content-center gap-3">
-          <a href="./raytha" class="btn btn-primary btn-lg px-4 d-inline-flex align-items-center gap-2">
-            <i class="bi bi-rocket-takeoff"></i>
-            Launch Admin Panel
-          </a>
-          <a href="https://github.com/raytha" class="btn btn-outline-light btn-lg px-4 d-inline-flex align-items-center gap-2">
-            <i class="bi bi-github"></i>
-            View on GitHub
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
+<!-- Hero Zone -->
+<section class="hero-zone">
+  <div class="simulator-section-placeholder" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #6c757d; border-radius: 8px; padding: 2rem; text-align: center; margin: 1rem 0;">
+    <div style="color: #495057; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Section</div>
+    <div style="color: #212529; font-weight: 600; font-size: 1.25rem;">hero</div>
+    <div style="color: #6c757d; font-size: 0.75rem; margin-top: 0.5rem;">Widgets render here in Raytha</div>
 </div>
+</section>
+
+<!-- Features Zone -->
+<section class="features-zone py-5">
+  <div class="container py-4">
+    <div class="simulator-section-placeholder" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #6c757d; border-radius: 8px; padding: 2rem; text-align: center; margin: 1rem 0;">
+    <div style="color: #495057; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Section</div>
+    <div style="color: #212529; font-weight: 600; font-size: 1.25rem;">features</div>
+    <div style="color: #6c757d; font-size: 0.75rem; margin-top: 0.5rem;">Widgets render here in Raytha</div>
+</div>
+  </div>
+</section>
+
+<!-- Content Zone -->
+<section class="content-zone bg-white py-5">
+  <div class="container py-4">
+    <div class="simulator-section-placeholder" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #6c757d; border-radius: 8px; padding: 2rem; text-align: center; margin: 1rem 0;">
+    <div style="color: #495057; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Section</div>
+    <div style="color: #212529; font-weight: 600; font-size: 1.25rem;">content</div>
+    <div style="color: #6c757d; font-size: 0.75rem; margin-top: 0.5rem;">Widgets render here in Raytha</div>
+</div>
+  </div>
+</section>
+
+<!-- CTA Zone -->
+<section class="cta-zone">
+  <div class="simulator-section-placeholder" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #6c757d; border-radius: 8px; padding: 2rem; text-align: center; margin: 1rem 0;">
+    <div style="color: #495057; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Section</div>
+    <div style="color: #212529; font-weight: 600; font-size: 1.25rem;">cta</div>
+    <div style="color: #6c757d; font-size: 0.75rem; margin-top: 0.5rem;">Widgets render here in Raytha</div>
+</div>
+</section>
 
   </main>
 
-  <footer class="bg-dark text-white mt-auto">
-    <div class="container py-4">
+  <!-- Footer -->
+  <footer class="footer py-5">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <h5 class="text-white mb-3 d-flex align-items-center gap-2">
+            <i class="bi bi-box-fill"></i>
+            My Raytha Site
+          </h5>
+          <p class="mb-0">Building great things together.</p>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="text-white mb-3">Quick Links</h6>
+          <ul class="list-unstyled mb-0">
+            
+            <li class="mb-2">
+              <a href="home.html" 
+                 >
+                Home
+              </a>
+            </li>
+            
+            <li class="mb-2">
+              <a href="posts.html" 
+                 >
+                Posts
+              </a>
+            </li>
+            
+            <li class="mb-2">
+              <a href="pages.html" 
+                 >
+                Pages
+              </a>
+            </li>
+            
+            <li class="mb-2">
+              <a href="pages_about.html" 
+                 >
+                About
+              </a>
+            </li>
+            
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="text-white mb-3">Connect</h6>
+          <div class="d-flex gap-3">
+            <a href="#" class="fs-5"><i class="bi bi-twitter-x"></i></a>
+            <a href="#" class="fs-5"><i class="bi bi-github"></i></a>
+            <a href="#" class="fs-5"><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+      </div>
+      <hr class="my-4 border-secondary">
       <div class="row align-items-center">
-        <div class="col-md-4 text-center text-md-start mb-3 mb-md-0">
-          <span class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
-            <i class="bi bi-box-fill text-primary"></i>
-            <span class="fw-semibold">My Raytha Site</span>
-          </span>
+        <div class="col-md-6">
+          <p class="mb-0 small">&copy; 2025 My Raytha Site. All rights reserved.</p>
         </div>
-        <div class="col-md-4 text-center mb-3 mb-md-0">
-          <small class="text-white-50">&copy; 2024 My Raytha Site. All rights reserved.</small>
-        </div>
-        <div class="col-md-4 text-center text-md-end">
-          <a rel="nofollow" href="https://raytha.com" class="text-white-50 text-decoration-none d-inline-flex align-items-center gap-1">
-            <span>Powered by</span>
-            <span class="fw-semibold text-white">Raytha CMS</span>
-            <i class="bi bi-arrow-up-right-square"></i>
-          </a>
+        <div class="col-md-6 text-md-end">
+          <a href="#" class="small me-3">Privacy Policy</a>
+          <a href="#" class="small">Terms of Service</a>
         </div>
       </div>
     </div>
   </footer>
 
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
-
 </html>
+

@@ -146,6 +146,7 @@ public partial class RenderEngine
         fluidContext.SetValue("get_content_type_by_developer_name", GetContentTypeByDeveloperName());
         fluidContext.SetValue("get_main_menu", GetMainMenu());
         fluidContext.SetValue("get_menu", GetMenuByDeveloperName());
+        fluidContext.SetValue("render_section", RenderSection());
     }
 
     #region Custom Filters
@@ -440,6 +441,23 @@ public partial class RenderEngine
 
             // Return empty menu
             return new ValueTask<FluidValue>(new ObjectValue(new NavigationMenuModel { MenuItems = new List<NavigationMenuItemModel>() }));
+        });
+    }
+
+    private FunctionValue RenderSection()
+    {
+        return new FunctionValue((args, _) =>
+        {
+            var sectionName = args.At(0).ToStringValue();
+            // Return a placeholder for the simulator
+            var placeholder = $"""
+                <div class="simulator-section-placeholder" style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border: 2px dashed #6c757d; border-radius: 8px; padding: 2rem; text-align: center; margin: 1rem 0;">
+                    <div style="color: #495057; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem;">Section</div>
+                    <div style="color: #212529; font-weight: 600; font-size: 1.25rem;">{sectionName}</div>
+                    <div style="color: #6c757d; font-size: 0.75rem; margin-top: 0.5rem;">Widgets render here in Raytha</div>
+                </div>
+                """;
+            return new ValueTask<FluidValue>(new StringValue(placeholder));
         });
     }
 

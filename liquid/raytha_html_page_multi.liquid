@@ -1,0 +1,39 @@
+{% layout 'raytha_html_base_layout' %}
+{% comment %}
+  Multi-Section Page Template (Site Page)
+  
+  A flexible layout with multiple distinct sections, ideal for:
+    - Marketing/landing pages
+    - Feature showcase pages
+    - Product pages
+  
+  Available sections:
+    - hero: Full-width hero/banner at the top
+    - features: Feature highlights section
+    - content: Main content area
+    - cta: Call-to-action section
+{% endcomment %}
+
+<!-- Hero Zone - Full Width -->
+<section class="hero-zone">
+  {{ render_section("hero") }}
+</section>
+
+<!-- Features Zone -->
+<section class="features-zone py-5 bg-light">
+  <div class="container py-4">
+    {{ render_section("features") }}
+  </div>
+</section>
+
+<!-- Content Zone -->
+<section class="content-zone py-5">
+  <div class="container py-4">
+    {{ render_section("content") }}
+  </div>
+</section>
+
+<!-- CTA Zone - Full Width -->
+<section class="cta-zone">
+  {{ render_section("cta") }}
+</section>

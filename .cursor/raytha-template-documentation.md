@@ -7,16 +7,21 @@ Use this as a reference when generating or editing Raytha templates.
 ## 1. Templating engine
 
 - Raytha templates use **Liquid** syntax rendered via the **.NET Fluid** library.
-- For general Liquid behavior / filters, refer to Shopify’s Liquid docs.
+- For general Liquid behavior / filters, refer to Shopify's Liquid docs.
 - Raytha adds its own objects, functions, and filters on top.
 
 ---
 
-## 2. Template storage & editing
+## 2. Themes & template storage
 
-- Templates are stored in the **database**.
-- Manage them in **Admin → Templates**.
-- There is a default parent layout template named **`_Layout`**.
+- Templates are organized into **Themes**.
+- A theme is a collection of:
+  - **Web Templates**: Liquid templates that render pages
+  - **Widget Templates**: Templates for Site Page widgets
+  - **Media Assets**: CSS, JavaScript, images, and fonts
+- Only one theme can be **active** at a time.
+- Manage themes in **Admin → Design → Themes**.
+- There is a default parent layout template named **`_Layout`** or **`raytha_html_base_layout`**.
 
 ---
 
@@ -53,12 +58,12 @@ Rules:
   {% renderbody %}
   ```
 
-  This is where the child template’s content will be rendered. If it is missing on a parent, Raytha will throw an error.
+  This is where the child template's content will be rendered. If it is missing on a parent, Raytha will throw an error.
 
 - Template inheritance is limited to **5 levels deep**.
 - When creating a template:
   - Select a parent layout (usually `_Layout`) if appropriate.
-  - Mark as “parent” only if it is meant to be inherited from.
+  - Mark as "parent" only if it is meant to be inherited from.
   - Never forget `{% renderbody %}` in parents.
 
 ---
@@ -76,28 +81,40 @@ Raytha exposes a number of variables in the template context.
 | `CurrentUser.IsAuthenticated`          | Boolean   |                                                      |
 | `CurrentUser.IsAdmin`                  | Boolean   |                                                      |
 | `CurrentUser.Roles`                    | Array     |                                                      |
-| `CurrentUser.UserGroups`               | Array     |                                                      |
+| `CurrentUser.UserGroups`               | Array     | Array of group developer names                       |
 | `CurrentUser.LastModificationTime`     | Date      |                                                      |
 | `CurrentUser.UserId`                   | String    |                                                      |
 | `CurrentUser.FirstName`                | String    |                                                      |
 | `CurrentUser.LastName`                 | String    |                                                      |
 | `CurrentUser.EmailAddress`             | String    |                                                      |
 | `CurrentOrganization.OrganizationName` | String    |                                                      |
+| `CurrentOrganization.WebsiteUrl`       | String    |                                                      |
+| `CurrentOrganization.TimeZone`         | String    |                                                      |
+| `CurrentOrganization.DateFormat`       | String    |                                                      |
 | `ContentType.LabelPlural`              | String    | Human-readable plural name                           |
 | `ContentType.LabelSingular`            | String    | Human-readable singular name                         |
 | `ContentType.DeveloperName`            | String    | Developer name of the content type                   |
 | `ContentType.Description`              | String    |                                                      |
-| `Target`                               | Object    | Main view context (list or detail)                   |
+| `Target`                               | Object    | Main view context (list, detail, or site page)       |
 | `Target.Items`                         | Array     | Items in list views                                  |
+
+### 4.2 Request information
+
+```liquid
+{{ Request.Path }}
+{{ Request.QueryString }}
+{{ Request.Host }}
+```
 
 ---
 
 ## 5. `Target` and view types
 
-Every public Raytha page is either:
+Every public Raytha page is one of:
 
-- A **list view** of a content type, or  
-- A **detail view** of a single content item.
+- A **list view** of a content type
+- A **detail view** of a single content item
+- A **Site Page** with widget zones
 
 `Target` behavior:
 
@@ -106,6 +123,8 @@ Every public Raytha page is either:
   - `Target.Items` is an array of content items.
 - **Detail view:**
   - `Target` is the content item itself.
+- **Site Page:**
+  - `Target` is the site page object with `Id`, `Title`, `RoutePath`, `IsPublished`.
 
 ---
 
@@ -173,10 +192,13 @@ Raytha exposes pagination info on `Target`:
 - `Target.RoutePath`
 - `Target.PageNumber`
 - `Target.TotalPages`
+- `Target.PageSize`
 - `Target.FirstVisiblePageNumber`
 - `Target.LastVisiblePageNumber`
 - `Target.PreviousDisabledCss`
 - `Target.NextDisabledCss`
+- `Target.HasPreviousPage`
+- `Target.HasNextPage`
 
 Example pagination snippet:
 
@@ -230,13 +252,18 @@ Example pagination snippet:
 
 A **detail view** is tied to a single content item.
 
-- You can choose which **detail template** a content item uses from the content item’s settings.
+- You can choose which **detail template** a content item uses from the content item's settings.
 - In a detail view, `Target` is that content item.
 
 Common usage:
 
+- `Target.Id`
 - `Target.PrimaryField`
 - `Target.RoutePath`
+- `Target.IsPublished`
+- `Target.IsDraft`
+- `Target.CreationTime`
+- `Target.LastModificationTime`
 - `Target.PublishedContent.<field>.Text`
 - `Target.PublishedContent.<field>.Value`
 
@@ -344,7 +371,184 @@ More complete example:
 
 ---
 
-## 8. OData usage in templates (public list views)
+## 8. Site Pages & Widget Templates
+
+Site Pages allow you to build pages using **widgets** arranged in **zones**.
+
+### 8.1 What is a Site Page?
+
+A Site Page:
+- Has a route path and can be published/unpublished
+- Contains one or more **widget zones** (e.g., "hero", "main", "sidebar")
+- Each zone can contain multiple **widgets**
+- Widgets are rendered using **widget templates**
+
+### 8.2 Site Page Target variables
+
+When rendering a Site Page template:
+
+```liquid
+{{ Target.Id }}
+{{ Target.Title }}
+{{ Target.IsPublished }}
+{{ Target.RoutePath }}
+```
+
+### 8.3 Rendering widget zones
+
+Use the `render_zone` function to render widgets in a zone:
+
+```liquid
+{{ render_zone "hero" }}
+{{ render_zone "main" }}
+{{ render_zone "sidebar" }}
+```
+
+### 8.4 Built-in widget types
+
+| Widget          | Developer Name   | Purpose                                    |
+|-----------------|------------------|--------------------------------------------|
+| **Hero**        | `hero`           | Large banner sections with headline and CTA |
+| **WYSIWYG**     | `wysiwyg`        | Rich text content blocks                   |
+| **Card**        | `card`           | Bordered content cards with image and button |
+| **CTA**         | `cta`            | Call-to-action sections                    |
+| **Content List**| `content_list`   | Dynamic lists of content items             |
+
+### 8.5 Widget template Target variables
+
+Each widget type has its own `Target` context with settings configured by the user.
+
+**Hero Widget:**
+```liquid
+{{ Target.headline }}
+{{ Target.subheadline }}
+{{ Target.backgroundColor }}
+{{ Target.textColor }}
+{{ Target.buttonText }}
+{{ Target.buttonUrl }}
+{{ Target.buttonStyle }}
+{{ Target.alignment }}
+{{ Target.minHeight }}
+{{ Target.backgroundImage }}
+```
+
+**WYSIWYG Widget:**
+```liquid
+{{ Target.content }}
+{{ Target.padding }}
+```
+
+**Card Widget:**
+```liquid
+{{ Target.title }}
+{{ Target.description }}
+{{ Target.imageUrl }}
+{{ Target.buttonText }}
+{{ Target.buttonUrl }}
+{{ Target.buttonStyle }}
+```
+
+**CTA Widget:**
+```liquid
+{{ Target.headline }}
+{{ Target.content }}
+{{ Target.buttonText }}
+{{ Target.buttonUrl }}
+{{ Target.buttonStyle }}
+{{ Target.backgroundColor }}
+{{ Target.textColor }}
+{{ Target.alignment }}
+```
+
+**Content List Widget:**
+```liquid
+{{ Target.headline }}
+{{ Target.subheadline }}
+{{ Target.contentType }}
+{{ Target.pageSize }}
+{{ Target.displayStyle }}
+{{ Target.showImage }}
+{{ Target.showDate }}
+{{ Target.showExcerpt }}
+{{ Target.linkText }}
+{{ Target.linkUrl }}
+
+{% for item in Target.items %}
+  {{ item.Id }}
+  {{ item.PrimaryField }}
+  {{ item.RoutePath }}
+  {{ item.CreationTime }}
+  {{ item.PublishedContent.field_name }}
+{% endfor %}
+```
+
+### 8.6 Widget template best practices
+
+**Check for blank values:**
+```liquid
+{% if Target.headline != blank %}
+  <h2>{{ Target.headline }}</h2>
+{% endif %}
+```
+
+**Provide default values:**
+```liquid
+<section style="background-color: {{ Target.backgroundColor | default: '#ffffff' }};">
+  ...
+</section>
+```
+
+**Escape user content:**
+```liquid
+<h1>{{ Target.headline | escape }}</h1>
+```
+
+### 8.7 Complete Hero widget example
+
+```liquid
+<section class="hero-widget" style="
+  background-color: {{ Target.backgroundColor | default: '#0d6efd' }};
+  color: {{ Target.textColor | default: '#ffffff' }};
+  min-height: {{ Target.minHeight | default: 400 }}px;
+  {% if Target.backgroundImage != blank %}
+  background-image: url('{{ Target.backgroundImage }}');
+  background-size: cover;
+  background-position: center;
+  {% endif %}
+">
+  <div class="container py-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-{{ Target.alignment | default: 'center' }}">
+        
+        {% if Target.headline != blank %}
+          <h1 class="display-4 fw-bold mb-3">
+            {{ Target.headline | escape }}
+          </h1>
+        {% endif %}
+        
+        {% if Target.subheadline != blank %}
+          <p class="lead mb-4">
+            {{ Target.subheadline | escape }}
+          </p>
+        {% endif %}
+        
+        {% if Target.buttonText != blank %}
+          <a href="{{ Target.buttonUrl | default: '#' }}" 
+             class="btn btn-{{ Target.buttonStyle | default: 'light' }} btn-lg"
+             {% if Target.buttonOpenNewTab %}target="_blank" rel="noopener"{% endif %}>
+            {{ Target.buttonText | escape }}
+          </a>
+        {% endif %}
+        
+      </div>
+    </div>
+  </div>
+</section>
+```
+
+---
+
+## 9. OData usage in templates (public list views)
 
 Raytha uses **OData-style** query parameters on public list views to allow:
 
@@ -355,7 +559,7 @@ Raytha uses **OData-style** query parameters on public list views to allow:
 
 These operate on the public route of a **list view**, e.g. `/blog`.
 
-### 8.1 Admin-configured base filter
+### 9.1 Admin-configured base filter
 
 - When you create/edit a list view in the admin portal, Raytha stores an OData filter query internally.
 - On public requests, Raytha:
@@ -366,7 +570,7 @@ You can **disable** client-side filter/sort by checking:
 
 - `Ignore client side filter and sort query parameters`
 
-### 8.2 `filter` query parameter
+### 9.2 `filter` query parameter
 
 **CRITICAL RULES:**
 
@@ -474,7 +678,7 @@ You can **disable** client-side filter/sort by checking:
 - **Text fields (single_line_text/long_text/wysiwyg)**: Use actual text content
 - **Number/Date fields**: Use the appropriate value format
 
-### 8.3 `orderby` query parameter
+### 9.3 `orderby` query parameter
 
 Use the `orderby` parameter to change sort order:
 
@@ -492,7 +696,7 @@ Use the `orderby` parameter to change sort order:
 
 This overrides the sort configured in the admin view.
 
-### 8.4 Pagination: `pageSize` & `pageNumber`
+### 9.4 Pagination: `pageSize` & `pageNumber`
 
 Use:
 
@@ -504,7 +708,7 @@ Examples:
 - `/blog?pageSize=1&pageNumber=2`
 - `/blog?pageSize=5`
 
-### 8.5 Search: `search` parameter
+### 9.5 Search: `search` parameter
 
 - List view search in admin is based on the columns selected for the view.
 - Public side uses the same search across those columns.
@@ -571,11 +775,11 @@ If you prefer search to submit on Enter key press only (no button):
 
 ---
 
-## 9. Custom functions (Liquid functions)
+## 10. Custom functions (Liquid functions)
 
 > Every function call hits the database. Heavy use in a single template can impact performance.
 
-### 9.1 `get_content_item_by_id(contentItemId)`
+### 10.1 `get_content_item_by_id(contentItemId)`
 
 - Returns a single content item by its **id**.
 
@@ -590,7 +794,7 @@ Example:
 {% endif %}
 ```
 
-### 9.2 `get_content_items(ContentType='developer_name', Filter='odata', OrderBy='odata', PageNumber=1, PageSize=25)`
+### 10.2 `get_content_items(ContentType='developer_name', Filter='odata', OrderBy='odata', PageNumber=1, PageSize=25)`
 
 - Returns items for a specific content type.
 - **IMPORTANT**: Returns an object with `.Items` (array) and `.TotalCount`, not a direct array!
@@ -664,7 +868,7 @@ Example:
 {% endif %}
 ```
 
-### 9.3 `get_content_type_by_developer_name(contentTypeDeveloperName)`
+### 10.3 `get_content_type_by_developer_name(contentTypeDeveloperName)`
 
 - Retrieves content type metadata including field definitions.
 
@@ -681,7 +885,7 @@ Example:
 {% endfor %}
 ```
 
-### 9.4 `get_main_menu()` and `get_menu('developerName')`
+### 10.4 `get_main_menu()` and `get_menu('developerName')`
 
 - `get_main_menu()` returns the navigation menu marked as default.
 - `get_menu('developerName')` returns a named menu.
@@ -726,11 +930,21 @@ IEnumerable<NavigationMenuItem_RenderModel> MenuItems
 
 You can iterate nested `MenuItems` for dropdowns / sub-menus.
 
+### 10.5 `render_zone` (Site Pages only)
+
+Renders all widgets in a named zone:
+
+```liquid
+{{ render_zone "hero" }}
+{{ render_zone "main" }}
+{{ render_zone "sidebar" }}
+```
+
 ---
 
-## 10. Custom filters
+## 11. Custom filters
 
-### 10.1 `attachment_redirect_url`
+### 11.1 `attachment_redirect_url`
 
 - Input: attachment field `.Value`.
 - Output: URL relative to the current site:
@@ -748,7 +962,7 @@ Example:
 
 > Note: Many such links on a page means many extra redirect requests.
 
-### 10.2 `attachment_public_url`
+### 11.2 `attachment_public_url`
 
 - Input: attachment field `.Value`.
 - Output: direct URL to file on the storage provider.
@@ -760,17 +974,17 @@ Example:
 {{ Target.PublishedContent.attachment.Value | attachment_public_url }}
 ```
 
-### 10.3 `raytha_attachment_url` (deprecated)
+### 11.3 `raytha_attachment_url` (deprecated)
 
 - Old name for `attachment_redirect_url`.
 - Scheduled to be removed in v1.0.6.
 - Prefer `attachment_redirect_url`.
 
-### 10.4 `organization_time`
+### 11.4 `organization_time`
 
-- Converts a DateTime into the organization’s configured timezone.
+- Converts a DateTime into the organization's configured timezone.
 - Common with `CreationTime`, `LastModificationTime`, etc.
-- Often combined with Liquid’s `date` filter.
+- Often combined with Liquid's `date` filter.
 
 Example:
 
@@ -778,7 +992,7 @@ Example:
 {{ item.CreationTime | organization_time | date: "%c" }}
 ```
 
-### 10.5 `groupby`
+### 11.5 `groupby`
 
 Common usage:
 
@@ -798,7 +1012,7 @@ Common usage:
   - `key`
   - `items` (array of items in that group)
 
-### 10.6 `json`
+### 11.6 `json`
 
 - Dumps any object as JSON-like output.
 - Very useful for debugging to see the shape of objects.
@@ -811,9 +1025,20 @@ Example:
 
 Use this during development and remove it from production templates.
 
+### 11.7 `get_navigation_menu` (filter)
+
+Retrieve a navigation menu by developer name:
+
+```liquid
+{% assign footer = 'footer_menu' | get_navigation_menu %}
+{% for item in footer.Items %}
+  <a href="{{ item.Url }}">{{ item.Label }}</a>
+{% endfor %}
+```
+
 ---
 
-## 11. General guidelines for Cursor
+## 12. General guidelines for Cursor
 
 When generating Raytha templates:
 
@@ -822,18 +1047,24 @@ When generating Raytha templates:
 3. Use `Target` appropriately:
    - List views: iterate `Target.Items`.
    - Detail views: treat `Target` as the item.
+   - Site Pages: use `render_zone` to output widget zones.
+   - Widget templates: access settings via `Target.<settingName>`.
 4. Prefer `.Value` for logic, `.Text` for display.
 5. Be mindful that function calls (`get_content_items`, etc.) hit the DB.
 6. Use OData (`filter`, `orderby`, `pageSize`, `pageNumber`, `search`) only on **public list view URLs**, not inside Liquid.
 7. Use `attachment_redirect_url` by default for secured files; `attachment_public_url` only when storage is publicly readable.
 8. Use `organization_time` when showing times that should respect the org timezone.
 9. Use `json` during development to inspect objects, then remove it in final templates.
+10. In widget templates:
+    - Always check for blank values before rendering
+    - Use the `default` filter for fallback values
+    - Escape user content with `| escape`
 
 ---
 
-## 12. Common Mistakes to Avoid
+## 13. Common Mistakes to Avoid
 
-### 12.1 Filtering mistakes
+### 13.1 Filtering mistakes
 
 ❌ **WRONG - Using simple query parameters:**
 ```liquid
@@ -869,7 +1100,7 @@ When generating Raytha templates:
 </a>
 ```
 
-### 12.2 Function call mistakes
+### 13.2 Function call mistakes
 
 ❌ **WRONG - Incorrect function name or syntax:**
 ```liquid
@@ -882,7 +1113,7 @@ When generating Raytha templates:
 {% assign items = get_content_items(ContentType='articles', PageSize=6) %}
 ```
 
-### 12.3 Iteration mistakes
+### 13.3 Iteration mistakes
 
 ❌ **WRONG - Iterating function result directly:**
 ```liquid
@@ -896,7 +1127,7 @@ When generating Raytha templates:
 {% for item in items.Items %}  {% comment %} Correct! {% endcomment %}
 ```
 
-### 12.4 Property check mistakes
+### 13.4 Property check mistakes
 
 ❌ **WRONG - Using wrong property names:**
 ```liquid
@@ -909,7 +1140,7 @@ When generating Raytha templates:
 {% if items.TotalCount > 0 %}
 ```
 
-### 12.5 Date formatting mistakes
+### 13.5 Date formatting mistakes
 
 ❌ **WRONG - Using date filter without organization_time:**
 ```liquid
@@ -918,10 +1149,10 @@ When generating Raytha templates:
 
 ✅ **CORRECT - Convert to org timezone first:**
 ```liquid
-{{ item.CreationTime | organization_time: "%B %d, %Y" }}
+{{ item.CreationTime | organization_time | date: "%B %d, %Y" }}
 ```
 
-### 12.6 URL construction mistakes
+### 13.6 URL construction mistakes
 
 ❌ **WRONG - Hardcoded URLs without PathBase:**
 ```liquid
@@ -935,7 +1166,7 @@ When generating Raytha templates:
 <a href="{{ PathBase }}/{{ item.RoutePath }}">Link</a>
 ```
 
-### 12.7 Pagination URL mistakes
+### 13.7 Pagination URL mistakes
 
 ❌ **WRONG - Not preserving filter in pagination:**
 ```liquid
@@ -948,7 +1179,7 @@ This loses any active filters when user clicks pagination!
 <a href="{{ PathBase }}/{{ Target.RoutePath }}?pageNumber={{ Target.PageNumber | plus: 1 }}">Next</a>
 ```
 
-### 12.8 Search implementation mistakes
+### 13.8 Search implementation mistakes
 
 ❌ **WRONG - Using JavaScript when HTML forms work:**
 ```liquid
@@ -988,4 +1219,38 @@ This loses any active filters when user clicks pagination!
     placeholder="Search..."
   >
 </form>
+```
+
+### 13.9 Widget template mistakes
+
+❌ **WRONG - Not handling empty values:**
+```liquid
+<h1>{{ Target.headline }}</h1>  {% comment %} Renders empty tag if blank {% endcomment %}
+```
+
+✅ **CORRECT - Conditional rendering:**
+```liquid
+{% if Target.headline != blank %}
+  <h1>{{ Target.headline }}</h1>
+{% endif %}
+```
+
+❌ **WRONG - Forgetting to escape user content:**
+```liquid
+<h1>{{ Target.headline }}</h1>  {% comment %} XSS vulnerability {% endcomment %}
+```
+
+✅ **CORRECT - Escaped:**
+```liquid
+<h1>{{ Target.headline | escape }}</h1>
+```
+
+❌ **WRONG - Hardcoded values instead of settings:**
+```liquid
+<section style="background-color: #0d6efd;">  {% comment %} Not customizable {% endcomment %}
+```
+
+✅ **CORRECT - Uses setting with fallback:**
+```liquid
+<section style="background-color: {{ Target.backgroundColor | default: '#0d6efd' }};">
 ```

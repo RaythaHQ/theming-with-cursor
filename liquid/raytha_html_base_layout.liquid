@@ -1,108 +1,176 @@
 <!DOCTYPE html>
-<html lang="en" data-bs-theme="light">
-
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>
-    {% if Target.PrimaryField %}
-    {{ Target.PrimaryField }} - {{ ContentType.LabelPlural }} | {{ CurrentOrganization.OrganizationName }}
-    {% elsif ContentType.LabelPlural %}
-    {{ ContentType.LabelPlural }} | {{ CurrentOrganization.OrganizationName }}
-    {% else %}
-    {{ CurrentOrganization.OrganizationName }}
-    {% endif %}
-  </title>
-
-  <link rel="shortcut icon" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/box.svg" type="image/svg+xml" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if Target.PrimaryField %}{{ Target.PrimaryField }} | {% endif %}{% if Target.Title %}{{ Target.Title }} | {% endif %}{{ CurrentOrganization.OrganizationName }}</title>
+  
+  <!-- Bootstrap 5 CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  
+  <!-- Bootstrap Icons -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  
+  <!-- Custom Styles -->
+  <style>
+    :root {
+      --primary-color: #0d6efd;
+      --secondary-color: #6c757d;
+      --dark-color: #212529;
+      --light-color: #f8f9fa;
+    }
+    
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    main {
+      flex: 1;
+    }
+    
+    .navbar-brand {
+      font-weight: 700;
+    }
+    
+    .footer {
+      background-color: var(--dark-color);
+      color: rgba(255, 255, 255, 0.7);
+    }
+    
+    .footer a {
+      color: rgba(255, 255, 255, 0.7);
+      text-decoration: none;
+    }
+    
+    .footer a:hover {
+      color: #fff;
+    }
+    
+    /* Article typography */
+    article {
+      font-size: 1.1rem;
+    }
+    
+    article h2, article h3, article h4 {
+      margin-top: 1.5em;
+      margin-bottom: 0.5em;
+    }
+    
+    article p {
+      margin-bottom: 1em;
+    }
+    
+    article img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 0.5rem;
+    }
+    
+    article pre {
+      background-color: #f8f9fa;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+    }
+    
+    article code {
+      background-color: #f8f9fa;
+      padding: 0.2em 0.4em;
+      border-radius: 0.25rem;
+    }
+    
+    article pre code {
+      background-color: transparent;
+      padding: 0;
+    }
+  </style>
 </head>
-
-<body class="d-flex flex-column min-vh-100 bg-body-tertiary">
-  <header class="sticky-top">
-    <nav class="navbar navbar-expand-lg bg-white shadow-sm">
-      <div class="container">
-        <a class="navbar-brand fw-bold text-primary d-flex align-items-center gap-2" href="{{ PathBase }}/">
-          <i class="bi bi-box-fill"></i>
-          {{ CurrentOrganization.OrganizationName }}
-        </a>
-        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-          {% assign menu = get_main_menu() %}
-          <ul class="navbar-nav ms-auto mb-2 mb-lg-0 gap-1">
-            {% for menuItem in menu.MenuItems %}
-              {% assign menuLabelDownCase = menuItem.Label | downcase %}
-              <li class="nav-item">
-                <a class="nav-link px-3 rounded-pill {% if Target.RoutePath == menuItem.Label or ContentType.DeveloperName == menuLabelDownCase %}active bg-primary bg-opacity-10 text-primary fw-semibold{% endif %}" href="{{ menuItem.Url }}">
-                  {{ menuItem.Label }}
-                </a>
-              </li>
-            {% endfor %}
-          </ul>
-          <div class="d-flex align-items-center ms-lg-3 gap-2">
-            {% if CurrentUser.IsAuthenticated %}
-            <div class="dropdown">
-              <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-person-circle"></i>
-                {{ CurrentUser.FullName }}
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end shadow border-0" aria-labelledby="userDropdown">
-                <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ PathBase }}/account/me"><i class="bi bi-person"></i> My profile</a></li>
-                <li><a class="dropdown-item d-flex align-items-center gap-2" href="{{ PathBase }}/account/me/change-password"><i class="bi bi-key"></i> Change password</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item d-flex align-items-center gap-2 text-danger" href="{{ PathBase }}/account/logout"><i class="bi bi-box-arrow-right"></i> Log out</a></li>
-                {% if CurrentUser.IsAdmin %}
-                <li><hr class="dropdown-divider"></li>
-                <li><a href="{{ PathBase }}/raytha" class="dropdown-item d-flex align-items-center gap-2"><i class="bi bi-gear"></i> Admin panel</a></li>
-                {% endif %}
-              </ul>
-            </div>
-            {% else %}
-            <a href="{{ PathBase }}/account/login" class="btn btn-outline-primary">
-              <i class="bi bi-box-arrow-in-right me-1"></i>Login
+<body class="bg-light">
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" href="{{ PathBase }}/">
+        <i class="bi bi-box-fill"></i>
+        {{ CurrentOrganization.OrganizationName }}
+      </a>
+      
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarMain">
+        {% assign menu = get_main_menu() %}
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          {% for menuItem in menu.MenuItems %}
+          <li class="nav-item">
+            <a class="nav-link {{ menuItem.CssClassName }}" 
+               href="{{ menuItem.Url }}"
+               {% if menuItem.OpenInNewTab %}target="_blank" rel="noopener"{% endif %}>
+              {{ menuItem.Label }}
             </a>
-            <a href="{{ PathBase }}/account/create" class="btn btn-primary">
-              <i class="bi bi-person-plus me-1"></i>Sign up
-            </a>
-            {% endif %}
-          </div>
-        </div>
+          </li>
+          {% endfor %}
+        </ul>
       </div>
-    </nav>
-  </header>
+    </div>
+  </nav>
 
-  <main class="flex-grow-1">
+  <!-- Main Content -->
+  <main>
     {% renderbody %}
   </main>
 
-  <footer class="bg-dark text-white mt-auto">
-    <div class="container py-4">
+  <!-- Footer -->
+  <footer class="footer py-5">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-lg-4">
+          <h5 class="text-white mb-3 d-flex align-items-center gap-2">
+            <i class="bi bi-box-fill"></i>
+            {{ CurrentOrganization.OrganizationName }}
+          </h5>
+          <p class="mb-0">Building great things together.</p>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="text-white mb-3">Quick Links</h6>
+          <ul class="list-unstyled mb-0">
+            {% for menuItem in menu.MenuItems %}
+            <li class="mb-2">
+              <a href="{{ menuItem.Url }}" 
+                 {% if menuItem.OpenInNewTab %}target="_blank" rel="noopener"{% endif %}>
+                {{ menuItem.Label }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="text-white mb-3">Connect</h6>
+          <div class="d-flex gap-3">
+            <a href="#" class="fs-5"><i class="bi bi-twitter-x"></i></a>
+            <a href="#" class="fs-5"><i class="bi bi-github"></i></a>
+            <a href="#" class="fs-5"><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+      </div>
+      <hr class="my-4 border-secondary">
       <div class="row align-items-center">
-        <div class="col-md-4 text-center text-md-start mb-3 mb-md-0">
-          <span class="d-flex align-items-center justify-content-center justify-content-md-start gap-2">
-            <i class="bi bi-box-fill text-primary"></i>
-            <span class="fw-semibold">{{ CurrentOrganization.OrganizationName }}</span>
-          </span>
+        <div class="col-md-6">
+          <p class="mb-0 small">&copy; {{ 'now' | date: "%Y" }} {{ CurrentOrganization.OrganizationName }}. All rights reserved.</p>
         </div>
-        <div class="col-md-4 text-center mb-3 mb-md-0">
-          <small class="text-white-50">&copy; 2024 {{ CurrentOrganization.OrganizationName }}. All rights reserved.</small>
-        </div>
-        <div class="col-md-4 text-center text-md-end">
-          <a rel="nofollow" href="https://raytha.com" class="text-white-50 text-decoration-none d-inline-flex align-items-center gap-1">
-            <span>Powered by</span>
-            <span class="fw-semibold text-white">Raytha CMS</span>
-            <i class="bi bi-arrow-up-right-square"></i>
-          </a>
+        <div class="col-md-6 text-md-end">
+          <a href="#" class="small me-3">Privacy Policy</a>
+          <a href="#" class="small">Terms of Service</a>
         </div>
       </div>
     </div>
   </footer>
 
+  <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
-
 </html>
+

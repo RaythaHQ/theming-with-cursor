@@ -1,0 +1,19 @@
+{% layout 'raytha_html_base_layout' %}
+{% comment %}
+  Full Width Page Template (Site Page)
+  
+  A simple, single-section layout ideal for:
+    - Landing pages
+    - Simple content pages
+    - Single-column layouts
+  
+  Available sections:
+    - main: Full-width content area
+{% endcomment %}
+
+<!-- Main Content Zone -->
+<section class="main-zone py-5">
+  <div class="container py-4">
+    {{ render_section("main") }}
+  </div>
+</section>
