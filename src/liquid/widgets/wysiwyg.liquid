@@ -1,35 +1,45 @@
 {% comment %}
-WYSIWYG Widget - Rich text content block.
+Widget: WYSIWYG
+Rich text content block.
 
 Settings:
   - content: HTML content from WYSIWYG editor
-  - backgroundColor: Background color (optional)
-  - padding: Padding size - none, small, medium, large (default: medium)
+  - padding: none, small, medium (default), large
+  - maxWidth: constrain content width - "narrow" (col-lg-6), "medium" (col-lg-8), "wide" (col-lg-10), "full" (col-12)
 
-Advanced Meta Fields (available on all widgets):
-  - widget.css_class: Custom CSS classes
-  - widget.html_id: Custom HTML ID attribute
-  - widget.custom_attributes: Custom HTML attributes string
-  - widget.row: Row position in section grid
-  - widget.column: Column position in row
-  - widget.column_span: Number of columns widget spans (1-12)
+Widget Meta (set via cssClass, htmlId fields on widget):
+  - widget.css_class: CSS class on outer wrapper (e.g., "testimonial-section", "contact-section")
+  - widget.html_id: ID attribute on outer wrapper
 {% endcomment %}
 
-{% assign padding_class = 'py-4' %}
-{% case widget.settings.padding %}
-  {% when 'none' %}
-    {% assign padding_class = '' %}
-  {% when 'small' %}
-    {% assign padding_class = 'py-2' %}
-  {% when 'large' %}
-    {% assign padding_class = 'py-5' %}
-{% endcase %}
+{% assign paddingClass = 'py-4' %}
+{% if widget.settings.padding == 'small' %}
+  {% assign paddingClass = 'py-2' %}
+{% elsif widget.settings.padding == 'large' %}
+  {% assign paddingClass = 'py-5' %}
+{% elsif widget.settings.padding == 'none' %}
+  {% assign paddingClass = '' %}
+{% endif %}
 
-<div class="wysiwyg-widget {{ padding_class }}{% if widget.css_class %} {{ widget.css_class }}{% endif %}"
-     {% if widget.html_id %}id="{{ widget.html_id }}"{% endif %}
-     {{ widget.custom_attributes }}
-     {% if widget.settings.backgroundColor %}style="background-color: {{ widget.settings.backgroundColor }};"{% endif %}>
-  <div class="wysiwyg-content">
-    {{ widget.settings.content }}
+{% assign widthClass = 'col-lg-8' %}
+{% if widget.settings.maxWidth == 'narrow' %}
+  {% assign widthClass = 'col-lg-6' %}
+{% elsif widget.settings.maxWidth == 'wide' %}
+  {% assign widthClass = 'col-lg-10' %}
+{% elsif widget.settings.maxWidth == 'full' %}
+  {% assign widthClass = 'col-12' %}
+{% endif %}
+
+<div class="wysiwyg-widget {{ paddingClass }}{% if widget.css_class != blank %} {{ widget.css_class }}{% endif %}"{% if widget.html_id != blank %} id="{{ widget.html_id }}"{% endif %}>
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="{{ widthClass }}">
+        <div class="wysiwyg-content">
+          {% if widget.settings.content != blank %}
+            {{ widget.settings.content }}
+          {% endif %}
+        </div>
+      </div>
+    </div>
   </div>
 </div>

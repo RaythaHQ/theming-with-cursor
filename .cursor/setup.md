@@ -419,6 +419,50 @@ dotnet run -- --help
 - Include actual Liquid `{{ }}` or `{% %}` in content text
 - Forget the `{% layout %}` tag in child templates (for local rendering)
 - Render empty HTML tags for blank widget settings
+- **Put CSS classes in WYSIWYG content** — TipTap editor produces plain HTML only
+
+---
+
+## WYSIWYG Content Rules (CRITICAL)
+
+WYSIWYG content comes from TipTap editor which produces **plain semantic HTML only**:
+
+**✅ ALLOWED in WYSIWYG content:**
+```html
+<h2>Heading</h2>
+<p>Paragraph text with <strong>bold</strong> and <em>italic</em>.</p>
+<ul><li>List item</li></ul>
+<ol><li>Numbered item</li></ol>
+<blockquote><p>Quote text</p></blockquote>
+<a href="url">Link text</a>
+```
+
+**❌ NOT ALLOWED in WYSIWYG content:**
+```html
+<div class="custom-class">...</div>
+<p class="text-muted">...</p>
+<section id="special">...</section>
+```
+
+### When You Need Custom Styling
+
+1. **Use widget `cssClass` meta field** — Style child elements via CSS:
+   ```json
+   { "cssClass": "testimonial-section", "settingsJson": "{\"content\": \"<blockquote>...</blockquote>\"}" }
+   ```
+   Then in your base layout CSS:
+   ```css
+   .testimonial-section blockquote { font-style: italic; background: #f5f5f5; }
+   ```
+
+2. **Use an Embed widget** — For custom HTML with classes:
+   ```json
+   { "widgetType": "embed", "settingsJson": "{\"embedCode\": \"<div class='contact-info'>...</div>\"}" }
+   ```
+
+3. **Split into multiple widgets** — Break complex content into separate widgets
+
+4. **Create a dedicated widget** — For reusable custom components, make a new widget template
 
 ---
 
@@ -495,15 +539,36 @@ When working in this repo, Cursor should:
 | `raytha_html_page_sidebar` | main, sidebar | About pages, blog-style |
 | `raytha_html_page_multi` | hero, features, content, cta | Marketing/product pages |
 
+### Widget Meta Fields
+
+All widgets support these meta fields (set at the widget level, not in settingsJson):
+
+| Field | Purpose | Example |
+|-------|---------|---------|
+| `cssClass` | CSS class on widget wrapper | `"testimonial-section"`, `"dark-theme"` |
+| `htmlId` | HTML ID attribute | `"hero-main"`, `"contact-form"` |
+| `customAttributes` | Additional HTML attributes | `"data-aos=\"fade-up\""` |
+
+**Use meta fields instead of wrapping content in divs.** For example, to style a WYSIWYG section:
+
+```json
+{
+  "id": "testimonial-1",
+  "widgetType": "wysiwyg",
+  "cssClass": "testimonial-section",
+  "settingsJson": "{\"content\": \"<blockquote>...</blockquote>\", \"padding\": \"large\"}"
+}
+```
+
 ### Widget Settings by Type
 
 | Widget | Settings |
 |--------|----------|
 | Hero | headline, subheadline, backgroundColor, textColor, buttonText, buttonUrl, buttonStyle, alignment, minHeight, backgroundImage |
-| WYSIWYG | content, padding |
+| WYSIWYG | content, padding (none/small/medium/large), maxWidth (narrow/medium/wide/full) |
 | Card | title, description, imageUrl, buttonText, buttonUrl, buttonStyle |
 | CTA | headline, content, buttonText, buttonUrl, buttonStyle, backgroundColor, textColor, alignment |
-| Image+Text | headline, content, imageUrl, imagePosition, buttonText, buttonUrl |
+| Image+Text | headline, content, imageUrl, imagePosition (left/right), buttonText, buttonUrl |
 | FAQ | headline, items (array of question/answer) |
 | Embed | embedCode, aspectRatio |
 | Content List | headline, contentType, pageSize, displayStyle, showImage, showDate, showExcerpt |

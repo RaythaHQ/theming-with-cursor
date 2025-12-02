@@ -202,7 +202,8 @@ Create `/dist/marketing/sample-data/site-pages.json`:
             "row": 1,
             "column": 1,
             "columnSpan": 12,
-            "settingsJson": "{\"content\": \"<h2 class='text-center mb-4'>Why Choose Us</h2><p class='text-center text-muted'>Everything you need to succeed</p>\", \"padding\": \"large\"}"
+            "cssClass": "text-center",
+            "settingsJson": "{\"content\": \"<h2>Why Choose Us</h2><p>Everything you need to succeed</p>\", \"padding\": \"large\"}"
           }
         ],
         "cta": [
