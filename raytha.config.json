@@ -1,7 +1,0 @@
-{
-    "$schema": "./raytha.config.schema.json",
-    "baseUrl": "http://localhost:5000",
-    "apiKey": "YOUR_API_KEY_HERE",
-    "themeDeveloperName": "raytha_default_theme",
-    "autoSync": false
-}
