@@ -268,7 +268,7 @@ static async Task<int> SyncTemplates(RaythaConfig config, string liquidDir)
     {
         using var client = new RaythaApiClient(config, liquidDir);
         var result = await client.SyncAllTemplatesAsync();
-        return result.Failed.Count > 0 ? 1 : 0;
+        return (result.Failed.Count > 0 || result.WidgetFailed.Count > 0) ? 1 : 0;
     }
     catch (Exception ex)
     {

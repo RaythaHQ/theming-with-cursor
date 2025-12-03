@@ -39,6 +39,14 @@ public class RaythaConfig
     /// </summary>
     [JsonPropertyName("templates")]
     public Dictionary<string, TemplateConfig>? Templates { get; set; }
+
+    /// <summary>
+    /// Optional: Override settings for specific widget templates.
+    /// Widgets are auto-discovered from the liquid/widgets/ directory.
+    /// Key = widget developer name (filename without .liquid extension)
+    /// </summary>
+    [JsonPropertyName("widgets")]
+    public Dictionary<string, WidgetConfig>? Widgets { get; set; }
 }
 
 /// <summary>
@@ -65,5 +73,18 @@ public class TemplateConfig
     /// </summary>
     [JsonPropertyName("templateAccessToModelDefinitions")]
     public List<string>? TemplateAccessToModelDefinitions { get; set; }
+}
+
+/// <summary>
+/// Optional configuration overrides for a widget template.
+/// </summary>
+public class WidgetConfig
+{
+    /// <summary>
+    /// Human-readable label for the widget in Raytha.
+    /// If not specified, auto-generated from filename.
+    /// </summary>
+    [JsonPropertyName("label")]
+    public string? Label { get; set; }
 }
 

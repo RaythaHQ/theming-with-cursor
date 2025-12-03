@@ -21,6 +21,7 @@ public partial class RaythaApiClient : IDisposable
     private readonly HttpClient _httpClient;
     private readonly RaythaConfig _config;
     private readonly string _liquidDirectory;
+    private readonly string _widgetsDirectory;
 
     // Regex patterns for local-only tags that must be stripped before publishing
     [GeneratedRegex(@"\{%\s*layout\s+['""]([^'""]+)['""]\s*%\}", RegexOptions.IgnoreCase)]
@@ -37,6 +38,7 @@ public partial class RaythaApiClient : IDisposable
     {
         _config = config;
         _liquidDirectory = liquidDirectory;
+        _widgetsDirectory = Path.Combine(liquidDirectory, "widgets");
         _httpClient = new HttpClient { BaseAddress = new Uri(config.BaseUrl.TrimEnd('/')) };
         _httpClient.DefaultRequestHeaders.Add("X-API-KEY", config.ApiKey);
     }
@@ -57,37 +59,87 @@ public partial class RaythaApiClient : IDisposable
         if (templates.Count == 0)
         {
             Console.WriteLine("No .liquid files found in liquid directory");
+        }
+        else
+        {
+            Console.WriteLine($"\nSyncing web templates to Raytha ({_config.BaseUrl})...");
+            Console.WriteLine($"Theme: {_config.ThemeDeveloperName}");
+            Console.WriteLine($"Found {templates.Count} web template(s)");
+            Console.WriteLine();
+
+            // Sort templates so base layouts are synced first (they have no parent)
+            var sortedTemplates = templates
+                .OrderBy(t => t.Value.ParentTemplateDeveloperName != null)
+                .ThenBy(t => t.Key);
+
+            foreach (var (developerName, templateInfo) in sortedTemplates)
+            {
+                try
+                {
+                    await SyncTemplateAsync(developerName, templateInfo);
+                    result.Succeeded.Add(developerName);
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"  ERROR: {ex.Message}");
+                    result.Failed.Add((developerName, ex.Message));
+                }
+            }
+        }
+
+        // Sync widget templates
+        var widgetResult = await SyncAllWidgetTemplatesAsync();
+        result.WidgetSucceeded.AddRange(widgetResult.WidgetSucceeded);
+        result.WidgetFailed.AddRange(widgetResult.WidgetFailed);
+
+        Console.WriteLine();
+        Console.WriteLine(
+            $"Sync complete: {result.Succeeded.Count} web templates, {result.WidgetSucceeded.Count} widgets succeeded"
+        );
+        if (result.Failed.Count > 0 || result.WidgetFailed.Count > 0)
+        {
+            Console.WriteLine(
+                $"  Failed: {result.Failed.Count} web templates, {result.WidgetFailed.Count} widgets"
+            );
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// Discovers all widget templates from the widgets directory and syncs them to Raytha.
+    /// Widget developer names are derived from filenames.
+    /// </summary>
+    public async Task<SyncResult> SyncAllWidgetTemplatesAsync()
+    {
+        var result = new SyncResult();
+
+        // Discover widget templates from widgets directory
+        var widgets = DiscoverWidgetTemplates();
+
+        if (widgets.Count == 0)
+        {
+            Console.WriteLine("\nNo widget templates found in widgets directory");
             return result;
         }
 
-        Console.WriteLine($"\nSyncing templates to Raytha ({_config.BaseUrl})...");
-        Console.WriteLine($"Theme: {_config.ThemeDeveloperName}");
-        Console.WriteLine($"Found {templates.Count} template(s)");
+        Console.WriteLine($"\nSyncing widget templates...");
+        Console.WriteLine($"Found {widgets.Count} widget template(s)");
         Console.WriteLine();
 
-        // Sort templates so base layouts are synced first (they have no parent)
-        var sortedTemplates = templates
-            .OrderBy(t => t.Value.ParentTemplateDeveloperName != null)
-            .ThenBy(t => t.Key);
-
-        foreach (var (developerName, templateInfo) in sortedTemplates)
+        foreach (var (developerName, widgetInfo) in widgets.OrderBy(w => w.Key))
         {
             try
             {
-                await SyncTemplateAsync(developerName, templateInfo);
-                result.Succeeded.Add(developerName);
+                await SyncWidgetTemplateAsync(developerName, widgetInfo);
+                result.WidgetSucceeded.Add(developerName);
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine($"  ERROR: {ex.Message}");
-                result.Failed.Add((developerName, ex.Message));
+                result.WidgetFailed.Add((developerName, ex.Message));
             }
         }
-
-        Console.WriteLine();
-        Console.WriteLine(
-            $"Sync complete: {result.Succeeded.Count} succeeded, {result.Failed.Count} failed"
-        );
 
         return result;
     }
@@ -144,6 +196,39 @@ public partial class RaythaApiClient : IDisposable
     }
 
     /// <summary>
+    /// Discovers widget templates from the widgets directory.
+    /// - Developer name = filename without .liquid extension
+    /// - Label = can be overridden in config, defaults to developer name with formatting
+    /// </summary>
+    private Dictionary<string, DiscoveredWidget> DiscoverWidgetTemplates()
+    {
+        var widgets = new Dictionary<string, DiscoveredWidget>();
+
+        if (!Directory.Exists(_widgetsDirectory))
+            return widgets;
+
+        foreach (var filePath in Directory.GetFiles(_widgetsDirectory, "*.liquid"))
+        {
+            var developerName = Path.GetFileNameWithoutExtension(filePath);
+            var content = File.ReadAllText(filePath);
+
+            // Check for config overrides
+            var configOverride = _config.Widgets?.GetValueOrDefault(developerName);
+
+            widgets[developerName] = new DiscoveredWidget
+            {
+                FilePath = filePath,
+                Content = content,
+                Label = !string.IsNullOrEmpty(configOverride?.Label)
+                    ? configOverride.Label
+                    : FormatLabel(developerName),
+            };
+        }
+
+        return widgets;
+    }
+
+    /// <summary>
     /// Formats a developer name into a human-readable label.
     /// e.g., "raytha_html_base_layout" -> "Raytha Html Base Layout"
     /// </summary>
@@ -186,6 +271,62 @@ public partial class RaythaApiClient : IDisposable
             await CreateTemplateAsync(developerName, template, cleanedContent);
             Console.WriteLine("created");
         }
+    }
+
+    /// <summary>
+    /// Syncs a single widget template to Raytha.
+    /// Widget templates are update-only since they are created by Raytha with the theme.
+    /// </summary>
+    public async Task SyncWidgetTemplateAsync(string developerName, DiscoveredWidget widget)
+    {
+        Console.Write($"  {developerName}... ");
+
+        // Strip local-only tags before publishing
+        var cleanedContent = StripLocalOnlyTags(widget.Content);
+
+        var updated = await TryUpdateWidgetTemplateAsync(developerName, widget, cleanedContent);
+
+        if (updated)
+        {
+            Console.WriteLine("updated");
+        }
+        else
+        {
+            Console.WriteLine("not found (widget must exist in Raytha)");
+        }
+    }
+
+    /// <summary>
+    /// Tries to update an existing widget template in Raytha.
+    /// Returns true if updated successfully, false if widget doesn't exist (404).
+    /// Throws on other errors.
+    /// </summary>
+    private async Task<bool> TryUpdateWidgetTemplateAsync(
+        string developerName,
+        DiscoveredWidget widget,
+        string content
+    )
+    {
+        var requestBody = new UpdateWidgetTemplateRequest
+        {
+            Label = widget.Label,
+            Content = content,
+        };
+
+        var response = await _httpClient.PutAsJsonAsync(
+            $"/raytha/api/v1/WidgetTemplates/theme/{_config.ThemeDeveloperName}/template/{developerName}",
+            requestBody,
+            JsonOptions
+        );
+
+        // If 404, widget doesn't exist - return false
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+        {
+            return false;
+        }
+
+        await EnsureSuccessAsync(response, "update widget template");
+        return true;
     }
 
     /// <summary>
@@ -307,6 +448,8 @@ public class SyncResult
 {
     public List<string> Succeeded { get; } = new();
     public List<(string TemplateName, string Error)> Failed { get; } = new();
+    public List<string> WidgetSucceeded { get; } = new();
+    public List<(string WidgetName, string Error)> WidgetFailed { get; } = new();
 }
 
 #region API Request/Response Models
@@ -359,6 +502,15 @@ internal class UpdateTemplateRequest
     public List<string>? TemplateAccessToModelDefinitions { get; set; }
 }
 
+internal class UpdateWidgetTemplateRequest
+{
+    [JsonPropertyName("label")]
+    public string Label { get; set; } = string.Empty;
+
+    [JsonPropertyName("content")]
+    public string Content { get; set; } = string.Empty;
+}
+
 #endregion
 
 /// <summary>
@@ -373,4 +525,14 @@ public class DiscoveredTemplate
     public string? ParentTemplateDeveloperName { get; set; }
     public bool AllowAccessForNewContentTypes { get; set; } = true;
     public List<string>? TemplateAccessToModelDefinitions { get; set; }
+}
+
+/// <summary>
+/// Represents a widget template discovered from the widgets directory
+/// </summary>
+public class DiscoveredWidget
+{
+    public string FilePath { get; set; } = string.Empty;
+    public string Content { get; set; } = string.Empty;
+    public string Label { get; set; } = string.Empty;
 }

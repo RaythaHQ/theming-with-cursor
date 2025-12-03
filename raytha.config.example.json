@@ -1,0 +1,17 @@
+{
+    "$schema": "./raytha.config.schema.json",
+    "baseUrl": "https://your-raytha-instance.example.com",
+    "apiKey": "YOUR_API_KEY_HERE",
+    "themeDeveloperName": "raytha_default_theme",
+    "autoSync": false,
+    "templates": {
+        "raytha_html_base_layout": {
+            "label": "Base Layout"
+        }
+    },
+    "widgets": {
+        "hero": {
+            "label": "Hero Section"
+        }
+    }
+}
